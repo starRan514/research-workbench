@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>科研工作台 · My AI Research Team</title>
+<style>
+:root{
+  --bg:#f5f6f8; --card:#ffffff; --line:#e6e8ec; --text:#1c1e21; --muted:#6b7280;
+  --brand:#0e9f6e; --brand-soft:#e3f7ef; --brand-text:#067a53;
+  --blue:#3b82f6; --blue-soft:#eaf2fe; --purple:#8b5cf6; --purple-soft:#f1eafd;
+  --pink:#ec4899; --pink-soft:#fdecf6; --orange:#ea9028; --orange-soft:#fdf3e3;
+  --teal:#14b8a6; --teal-soft:#e2f7f4; --gray:#9ca3af; --gray-soft:#f1f2f4;
+  --red:#e5484d; --radius:12px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"PingFang SC","Microsoft YaHei",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.65}
+button{font-family:inherit;cursor:pointer;border:none;background:none;font-size:14px}
+input,textarea,select{font-family:inherit;font-size:14px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%;background:#fff;color:var(--text)}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--brand-soft);border-color:var(--brand)}
+textarea{resize:vertical;min-height:70px}
+a{color:inherit;text-decoration:none}
+/* ---- 布局 ---- */
+.layout{display:flex;min-height:100vh}
+.sidebar{width:225px;flex-shrink:0;background:#fff;border-right:1px solid var(--line);padding:18px 12px;display:flex;flex-direction:column;gap:2px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.logo{font-weight:700;font-size:17px;padding:4px 10px 2px}
+.logo-sub{font-size:12px;color:var(--muted);padding:0 10px 14px;border-bottom:1px solid var(--line);margin-bottom:10px}
+.nav-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;color:#374151;font-size:14px}
+.nav-item:hover{background:var(--gray-soft)}
+.nav-item.active{background:var(--brand-soft);color:var(--brand-text);font-weight:600}
+.nav-sec{font-size:12px;color:var(--muted);padding:12px 10px 4px}
+.member-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.side-bottom{margin-top:auto;border-top:1px solid var(--line);padding-top:10px}
+.model-chip{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);padding:6px 10px;background:var(--gray-soft);border-radius:8px;margin-bottom:6px;max-width:100%}
+.model-chip b{color:var(--text);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-row{display:flex;align-items:center;justify-content:space-between;padding:4px 10px 0}
+.user-row .name{font-weight:600}
+.content{flex:1;padding:26px 32px;max-width:1060px;min-width:0}
+/* ---- 通用 ---- */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px}
+.grid{display:grid;gap:14px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;background:var(--brand);color:#fff;font-weight:500;transition:.15s}
+.btn:hover{filter:brightness(1.06)}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.btn.ghost{background:#fff;color:var(--text);border:1px solid var(--line)}
+.btn.ghost:hover{background:var(--gray-soft)}
+.btn.sm{padding:4px 10px;font-size:13px;border-radius:7px}
+.btn.danger{background:var(--red)}
+.pill{display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:500}
+.pill.st-running{background:var(--blue-soft);color:var(--blue)}
+.pill.st-crosscheck{background:var(--orange-soft);color:var(--orange)}
+.pill.st-decide{background:var(--brand-soft);color:var(--brand-text)}
+.pill.st-archived{background:var(--gray-soft);color:var(--muted)}
+.pill.sev-high{background:#fdeaea;color:var(--red)}
+.pill.sev-mid{background:var(--orange-soft);color:var(--orange)}
+.pill.sev-low{background:var(--blue-soft);color:var(--blue)}
+.tag{display:inline-block;padding:2px 9px;border-radius:6px;font-size:12px;background:var(--gray-soft);color:#4b5563;margin:2px 4px 2px 0}
+h2.page-title{font-size:20px;margin-bottom:4px}
+.page-sub{color:var(--muted);font-size:13px;margin-bottom:18px}
+.row{display:flex;align-items:center;gap:10px}
+.spread{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.muted{color:var(--muted)}
+.small{font-size:12.5px}
+.progress{height:5px;background:var(--gray-soft);border-radius:3px;overflow:hidden;width:90px}
+.progress i{display:block;height:100%;background:var(--brand);border-radius:3px}
+/* ---- 登录 ---- */
+.auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,#eef4f1,#f5f6f8 55%)}
+.auth-card{width:380px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:30px 30px 26px;box-shadow:0 10px 30px rgba(20,40,30,.06)}
+.auth-logo{text-align:center;font-size:20px;font-weight:700;margin-bottom:2px}
+.auth-sub{text-align:center;color:var(--muted);font-size:12.5px;margin-bottom:20px}
+.auth-tabs{display:flex;gap:6px;background:var(--gray-soft);padding:4px;border-radius:9px;margin-bottom:16px}
+.auth-tabs button{flex:1;padding:6px;border-radius:7px;color:var(--muted)}
+.auth-tabs button.on{background:#fff;color:var(--text);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:4px}
+/* ---- 仪表盘 ---- */
+.me-hero{display:flex;align-items:center;gap:14px;background:linear-gradient(120deg,#10231b,#1d3a2d);color:#fff;border-radius:var(--radius);padding:18px 22px;margin-bottom:16px}
+.me-hero .avatar{width:46px;height:46px;border-radius:50%;background:var(--brand);display:flex;align-items:center;justify-content:center;font-size:22px}
+.me-hero .role{font-size:12.5px;opacity:.75}
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:12px 16px}
+.stat b{font-size:20px}
+.stat .lb{font-size:12px;color:var(--muted)}
+.team-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;margin-bottom:20px}
+.member-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;cursor:pointer;transition:.15s;border-top:3px solid var(--mc,var(--brand))}
+.member-card:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.07)}
+.member-card .no{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.5px}
+.member-card .nm{font-weight:700;margin:1px 0}
+.member-card .tg{font-size:12px;color:var(--muted);margin-bottom:8px}
+.sub-chip{font-size:11.5px;background:var(--gray-soft);border-radius:6px;padding:2px 7px;margin:2px 4px 0 0;display:inline-block}
+.task-row{display:flex;align-items:center;gap:12px;padding:11px 6px;border-bottom:1px solid var(--line);cursor:pointer}
+.task-row:last-child{border-bottom:none}
+.task-row:hover{background:#fafbfc}
+.task-row .q{font-weight:500;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* ---- 成员页 ---- */
+.mem-head{border-radius:var(--radius);padding:20px 24px;color:#fff;margin-bottom:16px;background:var(--mc,var(--brand))}
+.mem-head .no{opacity:.8;font-size:13px;font-weight:600}
+.mem-head h2{font-size:21px}
+.mem-head .tg{opacity:.85;font-size:13px}
+.mem-cols{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.sec-title{font-size:13px;font-weight:700;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.flow-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.flow-step{background:#fff;border:1.5px solid var(--line);border-radius:8px;padding:5px 12px;font-size:13px;font-weight:500}
+.flow-arrow{color:var(--muted)}
+/* ---- 任务详情 ---- */
+.stage{border:1px solid var(--line);border-radius:var(--radius);background:#fff;margin-bottom:10px;overflow:hidden}
+.stage-head{display:flex;align-items:center;gap:12px;padding:12px 16px}
+.stage-num{width:26px;height:26px;border-radius:50%;background:var(--gray-soft);display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;color:var(--muted);flex-shrink:0}
+.stage-num.done{background:var(--brand);color:#fff}
+.stage-num.running{background:var(--blue);color:#fff;animation:pulse 1.2s infinite}
+@keyframes pulse{50%{opacity:.55}}
+.stage-name{font-weight:600;min-width:86px}
+.stage-out{border-top:1px dashed var(--line);padding:14px 18px;background:#fbfcfd}
+.point-item{padding:7px 0;border-bottom:1px dashed var(--line)}
+.point-item:last-child{border-bottom:none}
+.point-item b{font-size:13.5px}
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+.kcard{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.kcard .t{font-weight:600;margin-bottom:6px;font-size:13.5px}
+.kcard .kv{font-size:12.5px;margin:2px 0}
+.kcard .kv b{color:var(--brand-text)}
+table.tbl{width:100%;border-collapse:collapse;font-size:13px}
+table.tbl th{text-align:left;color:var(--muted);font-weight:500;font-size:12px;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+table.tbl td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+.review-card{border:1px solid var(--line);border-radius:var(--radius);background:#fff;margin-bottom:12px;overflow:hidden}
+.finding{padding:11px 16px;border-bottom:1px dashed var(--line)}
+.finding:last-child{border-bottom:none}
+.finding .fv{font-size:13px;margin:3px 0}
+.finding .fv b{color:var(--muted);font-weight:500;font-size:12px;margin-right:4px}
+/* ---- 弹窗 & 提示 ---- */
+.mask{position:fixed;inset:0;background:rgba(15,23,42,.42);display:flex;align-items:center;justify-content:center;z-index:50;padding:20px}
+.modal{background:#fff;border-radius:14px;width:520px;max-width:96vw;max-height:88vh;overflow-y:auto;padding:20px 22px}
+.modal h3{margin-bottom:14px;font-size:16px}
+.modal .actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+#toast{position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:99;display:flex;flex-direction:column;gap:8px;align-items:center}
+.toast-item{background:#111827;color:#fff;padding:9px 18px;border-radius:9px;font-size:13.5px;box-shadow:0 6px 18px rgba(0,0,0,.18);animation:fadein .2s}
+.toast-item.err{background:var(--red)}
+@keyframes fadein{from{opacity:0;transform:translateY(-6px)}}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:16px;flex-wrap:wrap}
+.tabs button{padding:8px 14px;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;font-weight:500}
+.tabs button.on{color:var(--brand-text);border-bottom-color:var(--brand)}
+.empty{color:var(--muted);text-align:center;padding:34px 0;font-size:13.5px}
+details.raw summary{cursor:pointer;color:var(--muted);font-size:12px}
+pre.raw{white-space:pre-wrap;word-break:break-all;background:var(--gray-soft);border-radius:8px;padding:10px;font-size:12px;margin-top:8px;color:#374151}
+@media (max-width:860px){
+  .sidebar{width:64px;padding:14px 8px}
+  .sidebar .logo,.sidebar .logo-sub,.sidebar .nav-item span.tx,.sidebar .nav-sec,.sidebar .model-chip,.sidebar .user-row .name{display:none}
+  .content{padding:18px}
+  .stat-row{grid-template-columns:repeat(2,1fr)}
+  .mem-cols{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div id="toast"></div>
+<div id="app"></div>
+
+<script>
+/* =====================================================
+   科研工作台 · SPA（无构建，hash 路由）
+===================================================== */
+const state = { me: null, members: null, sev: {}, settings: null, route: '', authTab: 'login', booted: false };
+
+/* ---------- 工具 ---------- */
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const nl2br = (s) => esc(s).replace(/\n/g, '<br>');
+
+function toast(msg, isErr) {
+  const el = document.createElement('div');
+  el.className = 'toast-item' + (isErr ? ' err' : '');
+  el.textContent = msg;
+  $('#toast').appendChild(el);
+  setTimeout(() => el.remove(), isErr ? 4200 : 2400);
+}
+
+async function api(path, opts = {}) {
+  if (opts.body && typeof opts.body !== 'string') opts.body = JSON.stringify(opts.body);
+  const r = await fetch(path, { headers: { 'content-type': 'application/json' }, ...opts });
+  let d = {};
+  try { d = await r.json(); } catch {}
+  if (r.status === 401 && state.me) { state.me = null; render(); }
+  if (!r.ok && d.error) throw new Error(d.error);
+  if (d.error) throw new Error(d.error);
+  return d;
+}
+
+function modal(title, bodyHTML, onOk, okText = '确定', wide) {
+  closeModal();
+  const mask = document.createElement('div');
+  mask.className = 'mask'; mask.id = 'modal-mask';
+  mask.innerHTML = `<div class="modal" ${wide ? 'style="width:680px"' : ''}><h3>${esc(title)}</h3><div id="modal-body">${bodyHTML}</div>
+    <div class="actions"><button class="btn ghost" id="modal-cancel">取消</button><button class="btn" id="modal-ok">${esc(okText)}</button></div></div>`;
+  document.body.appendChild(mask);
+  mask.addEventListener('click', (e) => { if (e.target === mask) closeModal(); });
+  $('#modal-cancel').onclick = closeModal;
+  $('#modal-ok').onclick = async () => { try { await onOk(); } catch (e) { toast(e.message, true); } };
+}
+function closeModal() { const m = $('#modal-mask'); if (m) m.remove(); }
+
+/* ---------- 常量 ---------- */
+const MEMBER_COLORS = { lit: 'var(--blue)', exec: 'var(--brand)', edit: 'var(--pink)', review: 'var(--purple)', qa: 'var(--teal)' };
+const STATUS = { running: ['st-running', '进行中'], crosscheck: ['st-crosscheck', '待互查'], decide: ['st-decide', '待我判断'], archived: ['st-archived', '已归档'] };
+const SEV_CLASS = { high: 'sev-high', mid: 'sev-mid', low: 'sev-low' };
+
+function statusPill(s) { const [c, t] = STATUS[s] || STATUS.running; return `<span class="pill ${c}">${t}</span>`; }
+function sevPill(s) { return `<span class="pill ${SEV_CLASS[s] || 'sev-mid'}">${{ high: '严重', mid: '中等', low: '轻微' }[s] || s}</span>`; }
+function memberDot(k) { return `<span class="member-dot" style="background:${MEMBER_COLORS[k] || 'var(--gray)'}"></span>`; }
+function subChip(k, sid) {
+  const m = state.members[k]; if (!m) return '';
+  const s = m.subs.find((x) => x.id === sid);
+  return `<span class="sub-chip">${esc(s ? s.name : sid)}</span>`;
+}
+
+/* ---------- 启动 ---------- */
+async function boot() {
+  try {
+    const d = await api('/api/me');
+    state.me = d.user; state.members = d.members; state.sev = d.sev;
+  } catch {}
+  state.booted = true;
+  window.addEventListener('hashchange', render);
+  render();
+}
+boot();
+
+/* ---------- 路由 ---------- */
+function currentRoute() {
+  const h = location.hash.replace(/^#\/?/, '') || (state.me ? 'dash' : '');
+  return h.split('/');
+}
+async function render() {
+  if (!state.booted) return;
+  const app = $('#app');
+  if (!state.me) { app.innerHTML = authView(); wireAuth(); return; }
+  if (!state.members) {
+    const d = await api('/api/me'); state.members = d.members; state.sev = d.sev;
+  }
+  const [page, arg] = currentRoute();
+  state.route = page;
+  const pages = { dash: dashView, projects: projectsView, project: projectView, task: taskView, member: memberView, knowledge: knowledgeView, reading: readingView, settings: settingsView };
+  const fn = pages[page] || dashView;
+  app.innerHTML = `<div class="layout">${sidebar(page)}<div class="content" id="page"><div class="empty">加载中…</div></div></div>`;
+  wireNav();
+  try { await fn(arg); } catch (e) { $('#page').innerHTML = `<div class="card"><div class="empty">加载失败：${esc(e.message)}</div></div>`; }
+}
+
+/* ---------- 登录 ---------- */
+function authView() {
+  return `<div class="auth-wrap"><div class="auth-card">
+    <div class="auth-logo">🔬 科研工作台</div>
+    <div class="auth-sub">My AI Research Team · 把一个人的科研变成一个小团队</div>
+    <div class="auth-tabs">
+      <button class="${state.authTab === 'login' ? 'on' : ''}" data-tab="login">登录</button>
+      <button class="${state.authTab === 'register' ? 'on' : ''}" data-tab="register">注册</button>
+    </div>
+    <div class="field"><label>用户名</label><input id="a-user" placeholder="2-24 位中文/字母/数字/下划线"></div>
+    <div class="field"><label>密码</label><input id="a-pass" type="password" placeholder="至少 6 位" onkeydown="if(event.key==='Enter')document.getElementById('a-go').click()"></div>
+    <button class="btn" id="a-go" style="width:100%;justify-content:center;margin-top:6px">${state.authTab === 'login' ? '登录' : '注册并登录'}</button>
+  </div></div>`;
+}
+function wireAuth() {
+  $$('.auth-tabs button').forEach((b) => b.onclick = () => { state.authTab = b.dataset.tab; render(); });
+  $('#a-go').onclick = async () => {
+    const username = $('#a-user').value.trim(), password = $('#a-pass').value;
+    try {
+      const path = state.authTab === 'login' ? '/api/login' : '/api/register';
+      const d = await api(path, { method: 'POST', body: { username, password } });
+      state.me = { username: d.username };
+      location.hash = '#/dash';
+      toast(state.authTab === 'login' ? '欢迎回来' : '注册成功，开始搭建你的 AI 科研团队');
+      render();
+    } catch (e) { toast(e.message, true); }
+  };
+}
+
+/* ---------- 侧栏 ---------- */
+function sidebar(page) {
+  const nav = (href, key, label) => `<a class="nav-item ${page === key ? 'active' : ''}" href="#/${href}"><span class="tx">${label}</span></a>`;
+  const memberLinks = Object.values(state.members).map((m) =>
+    `<a class="nav-item ${page === 'member' && location.hash.endsWith(m.id) ? 'active' : ''}" href="#/member/${m.id}" title="${esc(m.name)}">${memberDot(m.id)}<span class="tx" style="font-size:13px">${esc(m.name.replace('AI ', '').replace('组员', ''))}</span></a>`).join('');
+  const cfg = activeConfig();
+  return `<div class="sidebar">
+    <div class="logo">科研工作台</div>
+    <div class="logo-sub">My AI Research Team</div>
+    ${nav('dash', 'dash', '🏠 总览')}
+    ${nav('projects', 'projects', '📁 项目')}
+    ${nav('knowledge', 'knowledge', '📚 知识库')}
+    ${nav('reading', 'reading', '📖 青简文献库')}
+    ${nav('settings', 'settings', '⚙️ 设置')}
+    <div class="nav-sec">AI 组员</div>
+    ${memberLinks}
+    <div class="side-bottom">
+      <div class="model-chip" title="${esc(cfg ? cfg.name + ' · ' + cfg.model : '未配置模型')}">🤖 <b>${cfg ? esc(cfg.model) : '未配置模型'}</b></div>
+      <div class="user-row"><span class="name">${esc(state.me.username)}</span><button class="btn ghost sm" id="btn-logout">退出</button></div>
+    </div>
+  </div>`;
+}
+function activeConfig() {
+  if (!state.settings) return null;
+  const cs = state.settings.configs || [];
+  return cs.find((c) => c.id === state.settings.active_id) || cs[0] || null;
+}
+function wireNav() { const b = $('#btn-logout'); if (b) b.onclick = async () => { await api('/api/logout', { method: 'POST' }); state.me = null; location.hash = ''; render(); }; }
+
+async function loadSettings() { state.settings = await api('/api/settings'); return state.settings; }
+
+/* ---------- 总览 ---------- */
+async function dashView() {
+  const [d] = await Promise.all([api('/api/dashboard'), loadSettings()]);
+  const team = Object.values(state.members).map((m) => `
+    <div class="member-card" style="--mc:${MEMBER_COLORS[m.id]}" onclick="location.hash='#/member/${m.id}'">
+      <div class="no">${m.no}</div><div class="nm">${esc(m.name)}</div><div class="tg">${esc(m.tagline)}</div>
+      ${m.subs.map((s) => `<span class="sub-chip">${esc(s.name.replace(' subagent', ''))}</span>`).join('')}
+    </div>`).join('');
+  const recent = d.recent.map((t) => `
+    <div class="task-row" onclick="location.hash='#/task/${t.id}'">
+      ${memberDot(t.owner_member)}
+      <span class="q">${esc(t.question)}</span>
+      <span class="muted small">${esc(t.project_title || '')}</span>
+      <div class="progress"><i style="width:${(t.stages_done / 5) * 100}%"></i></div>
+      <span class="muted small">${t.stages_done}/5</span>
+      ${statusPill(t.status)}
+    </div>`).join('');
+  $('#page').innerHTML = `
+    <div class="me-hero">
+      <div class="avatar">🎓</div>
+      <div><div style="font-size:17px;font-weight:700">我 · PhD Student</div>
+      <div class="role">设定方向 · 分配任务 · 做决策 —— AI 负责重复环节，我负责判断和最终决策</div></div>
+    </div>
+    <div class="stat-row">
+      <div class="stat"><b>${d.counts.projects}</b><div class="lb">研究项目</div></div>
+      <div class="stat"><b>${d.counts.open_tasks}</b><div class="lb">进行中任务</div></div>
+      <div class="stat"><b>${d.counts.pending_findings}</b><div class="lb">待处理问题</div></div>
+      <div class="stat"><b>${d.counts.lit + d.counts.cards + d.counts.terms}</b><div class="lb">知识库条目</div></div>
+    </div>
+    <div class="sec-title">My AI Research Team</div>
+    <div class="team-grid">${team}</div>
+    <div class="card">
+      <div class="spread" style="margin-bottom:6px"><div class="sec-title" style="margin:0">最近任务</div>
+      ${d.counts.projects ? `<button class="btn sm ghost" onclick="location.hash='#/projects'">查看项目</button>` : ''}</div>
+      ${recent || '<div class="empty">还没有任务 —— 到「项目」里新建课题并下达第一个任务</div>'}
+    </div>`;
+}
+
+/* ---------- 项目 ---------- */
+async function projectsView() {
+  const d = await api('/api/projects');
+  const list = d.projects.map((p) => `
+    <div class="card" style="cursor:pointer;margin-bottom:12px" onclick="location.hash='#/project/${p.id}'">
+      <div class="spread"><b style="font-size:15px">${esc(p.title)}</b><span class="muted small">${p.open_count} 个进行中 / 共 ${p.task_count} 任务</span></div>
+      <div class="muted small">${esc([p.topic, p.direction, p.target_journal].filter(Boolean).join(' · ') || '暂无补充信息')}</div>
+    </div>`).join('');
+  $('#page').innerHTML = `
+    <div class="spread"><div><h2 class="page-title">研究项目</h2><div class="page-sub">课题 = 研究主题 + 方向 + 目标期刊，任务都挂在项目下</div></div>
+    <button class="btn" id="btn-add-project">＋ 新建项目</button></div>
+    ${list || '<div class="card"><div class="empty">还没有项目，点右上角新建</div></div>'}`;
+  $('#btn-add-project').onclick = () => modal('新建研究项目', `
+    <div class="field"><label>项目标题 *</label><input id="p-title" placeholder="如：荷电颗粒-流场耦合仿真研究"></div>
+    <div class="field"><label>研究主题</label><input id="p-topic"></div>
+    <div class="field"><label>研究方向</label><input id="p-direction"></div>
+    <div class="field"><label>目标期刊</label><input id="p-journal" placeholder="如：Journal of Fluid Mechanics"></div>`,
+    async () => {
+      await api('/api/projects', { method: 'POST', body: { title: $('#p-title').value, topic: $('#p-topic').value, direction: $('#p-direction').value, target_journal: $('#p-journal').value } });
+      closeModal(); toast('项目已创建'); render();
+    }, '创建');
+}
+
+async function projectView(pid) {
+  const d = await api('/api/projects/' + pid);
+  const p = d.project;
+  const taskRow = (t) => `
+    <div class="task-row" onclick="location.hash='#/task/${t.id}'">
+      ${memberDot(t.owner_member)}
+      <span class="q">${esc(t.question)}</span>
+      <div class="progress"><i style="width:${(t.stages_done / 5) * 100}%"></i></div>
+      <span class="muted small">${t.stages_done}/5</span>
+      ${statusPill(t.status)}
+      <button class="btn ghost sm" data-del-task="${t.id}" onclick="event.stopPropagation()">删除</button>
+    </div>`;
+  $('#page').innerHTML = `
+    <a href="#/projects" class="muted small">← 全部项目</a>
+    <div class="spread" style="margin:6px 0 4px">
+      <h2 class="page-title">${esc(p.title)}</h2>
+      <div class="row">
+        <button class="btn ghost sm" id="btn-edit-project">编辑</button>
+        <button class="btn" id="btn-new-task">＋ 新建任务</button>
+      </div>
+    </div>
+    <div class="page-sub">${esc([p.topic, p.direction, p.target_journal].filter(Boolean).map((x) => ({ topic: '主题：', direction: '方向：', target_journal: '目标期刊：' }[Object.keys({ topic: 1, direction: 1, target_journal: 1 }).find((k) => p[k] === x)] || '') + x).join(' · '))}</div>
+    <div class="card">${d.tasks.map(taskRow).join('') || '<div class="empty">项目下还没有任务，点「新建任务」给 AI 组员下达第一个问题</div>'}</div>`;
+  wireNav();
+  $$('[data-del-task]').forEach((b) => b.onclick = async (e) => {
+    e.stopPropagation();
+    if (!confirm('确定删除该任务？相关产出与互查记录将一并删除。')) return;
+    await api('/api/tasks/' + b.dataset.delTask, { method: 'DELETE' }); toast('已删除'); render();
+  });
+  $('#btn-edit-project').onclick = () => modal('编辑项目', `
+    <div class="field"><label>项目标题</label><input id="p-title" value="${esc(p.title)}"></div>
+    <div class="field"><label>研究主题</label><input id="p-topic" value="${esc(p.topic)}"></div>
+    <div class="field"><label>研究方向</label><input id="p-direction" value="${esc(p.direction)}"></div>
+    <div class="field"><label>目标期刊</label><input id="p-journal" value="${esc(p.target_journal)}"></div>`,
+    async () => {
+      await api('/api/projects/' + pid, { method: 'PUT', body: { title: $('#p-title').value, topic: $('#p-topic').value, direction: $('#p-direction').value, target_journal: $('#p-journal').value } });
+      closeModal(); toast('已保存'); render();
+    });
+  $('#btn-new-task').onclick = () => {
+    const memberOpts = Object.values(state.members).map((m) => `<option value="${m.id}">${m.no} ${esc(m.name)} — ${esc(m.tagline)}</option>`).join('');
+    const collabBoxes = Object.values(state.members).map((m) => `<label style="display:inline-flex;align-items:center;gap:4px;margin-right:12px"><input type="checkbox" value="${m.id}" style="width:auto"> ${esc(m.name.replace('AI ', ''))}</label>`).join('');
+    modal('下达新任务（我先提问题）', `
+      <div class="field"><label>研究问题 *</label><textarea id="t-question" placeholder="明确、具体的问题，如：梳理近 5 年荷电颗粒喷雾在静电喷雾中的关键研究进展"></textarea></div>
+      <div class="field"><label>补充说明（边界条件 / 参数 / 草稿等，可选）</label><textarea id="t-detail"></textarea></div>
+      <div class="field"><label>主责组员 *</label><select id="t-owner">${memberOpts}</select></div>
+      <div class="field"><label>协作组员（可选，参与互查）</label><div>${collabBoxes}</div></div>`,
+      async () => {
+        const collab = $$('#modal-body input[type=checkbox]:checked').map((c) => c.value);
+        const r = await api('/api/tasks', { method: 'POST', body: { project_id: +pid, question: $('#t-question').value, detail: $('#t-detail').value, owner_member: $('#t-owner').value, collab } });
+        closeModal(); toast('任务已创建'); location.hash = '#/task/' + r.id;
+      }, '创建任务');
+  };
+}
+
+/* ---------- 任务详情 ---------- */
+async function taskView(tid) {
+  const d = await api('/api/tasks/' + tid);
+  const t = d.task, owner = state.members[t.owner_member];
+  const stMap = { pending: ['待运行', 'var(--gray)'], done: ['已完成', 'var(--brand)'] };
+
+  const renderOut = (s) => {
+    if (!s.output) return '';
+    const o = s.output, data = o.data || {};
+    let inner = '';
+    if (o.kind === 'points') {
+      inner = (data.summary ? `<p style="margin-bottom:8px">${nl2br(data.summary)}</p>` : '') +
+        (data.points || []).map((pt) => `<div class="point-item"><b>${esc(pt.title)}</b><div class="small" style="color:#374151">${nl2br(pt.detail)}</div></div>`).join('');
+    } else if (o.kind === 'cards') {
+      inner = (data.summary ? `<p style="margin-bottom:10px">${nl2br(data.summary)}</p>` : '') +
+        `<div class="cards-grid">${(data.cards || []).map((c) => `
+          <div class="kcard"><div class="t">📄 ${esc(c.lit_title)}</div>
+          <div class="kv"><b>问题</b> ${nl2br(c.question)}</div><div class="kv"><b>方法</b> ${nl2br(c.method)}</div>
+          <div class="kv"><b>结果</b> ${nl2br(c.result)}</div><div class="kv"><b>局限</b> ${nl2br(c.limitation)}</div></div>`).join('')}</div>`;
+    } else if (o.kind === 'refs') {
+      inner = (data.summary ? `<p style="margin-bottom:8px">${nl2br(data.summary)}</p>` : '') +
+        `<table class="tbl"><tr><th>#</th><th>题名</th><th>作者</th><th>年份</th><th>期刊/会议</th><th>DOI</th></tr>
+        ${(data.references || []).map((r, i) => `<tr><td>${i + 1}</td><td>${esc(r.title)}</td><td>${esc(r.authors)}</td><td>${esc(r.year)}</td><td>${esc(r.venue)}</td><td class="small">${esc(r.doi)}</td></tr>`).join('')}</table>`;
+    } else if (o.kind === 'findings') {
+      inner = (data.summary ? `<p style="margin-bottom:8px">${nl2br(data.summary)}</p>` : '') +
+        (data.findings || []).map((f) => `<div class="point-item"><div class="row" style="gap:8px">${sevPill(f.severity)}<b class="small">${esc(f.location)}</b></div>
+          <div class="small" style="color:#374151;margin-top:2px">${nl2br(f.evidence)}</div>
+          <div class="small" style="color:var(--brand-text);margin-top:2px">建议：${nl2br(f.suggestion)}</div></div>`).join('');
+    }
+    const raw = (o.raw ? `<details class="raw"><summary>原始 LLM 输出</summary><pre class="raw">${esc(o.raw)}</pre></details>` : '');
+    return `<div class="stage-out"><div class="sec-title">${esc(owner.subs.find((x) => x.id === s.subagent)?.name || s.subagent)} · 产出</div>${inner}${raw}</div>`;
+  };
+
+  const stagesHTML = d.stages.map((s) => {
+    const [stLabel, stColor] = stMap[s.status] || stMap.pending;
+    return `<div class="stage">
+      <div class="stage-head">
+        <div class="stage-num ${s.status}">${s.idx + 1}</div>
+        <span class="stage-name">${esc(s.name)}</span>
+        ${subChip(s.member, s.subagent)}
+        <span class="small" style="color:${stColor}">${stLabel}</span>
+        <span style="flex:1"></span>
+        ${s.status === 'pending' ? `<button class="btn sm" data-run="${s.idx}" ${activeConfig() ? '' : 'disabled title="先到设置里配置模型"'}>▶ 运行</button>` : ''}
+        ${s.status === 'done' ? `<button class="btn ghost sm" data-rerun="${s.idx}">↻ 重跑</button><button class="btn ghost sm" data-toggle-out="${s.idx}">${s.output ? '收起产出' : '查看产出'}</button>` : ''}
+      </div>
+      <div id="stage-out-${s.idx}" style="display:none">${s.output ? renderOut(s) : ''}</div>
+    </div>`;
+  }).join('');
+
+  const reviewsHTML = d.reviews.map((r) => {
+    const rm = state.members[r.reviewer];
+    const findings = (r.findings || []).map((f, i) => {
+      const done = f.verdict !== 'pending';
+      const vLabel = { accepted: '✔ 已采纳', rejected: '✖ 已驳回', modified: '✎ 已修改' }[f.verdict] || '';
+      const vColor = { accepted: 'var(--brand-text)', rejected: 'var(--red)', modified: 'var(--orange)' }[f.verdict] || '';
+      return `<div class="finding">
+        <div class="row" style="gap:8px;flex-wrap:wrap">${sevPill(f.severity)}<b class="small">${esc(f.location)}</b>${done ? `<span class="small" style="color:${vColor};font-weight:600">${vLabel}</span>` : ''}</div>
+        <div class="fv"><b>依据</b>${nl2br(f.evidence)}</div>
+        <div class="fv"><b>建议</b>${nl2br(f.suggestion)}</div>
+        ${f.note ? `<div class="fv"><b>我的批注</b>${nl2br(f.note)}</div>` : ''}
+        ${!done && t.status !== 'archived' ? `<div class="row" style="margin-top:6px">
+          <button class="btn sm" data-verdict="${r.id}|${i}|accepted">采纳</button>
+          <button class="btn sm ghost" data-verdict="${r.id}|${i}|modified">已修改</button>
+          <button class="btn sm danger" data-verdict="${r.id}|${i}|rejected">驳回</button></div>` : ''}
+      </div>`;
+    }).join('');
+    return `<div class="review-card">
+      <div class="spread" style="padding:12px 16px;border-bottom:1px solid var(--line)">
+        <div class="row">${memberDot(r.reviewer)}<b>${esc(rm ? rm.name : r.reviewer)}</b>
+        <span class="pill ${r.kind === 'auto' ? 'st-decide' : 'st-running'}">${r.kind === 'auto' ? '自动质检' : '手动送审'}</span></div>
+        <span class="muted small">${esc(r.created_at)}</span>
+      </div>
+      <div style="padding:10px 16px" class="small">${r.note ? `<div class="muted" style="margin-bottom:6px">送审说明：${nl2br(r.note)}</div>` : ''}
+      ${r.summary ? nl2br(r.summary) : ''}</div>
+      ${findings || '<div class="empty">无问题条目</div>'}
+    </div>`;
+  }).join('');
+
+  const decisions = d.decisions.map((dd) => `<div class="small" style="padding:4px 0;border-bottom:1px dashed var(--line)">
+    <span class="pill ${dd.verdict === 'accepted' ? 'st-decide' : dd.verdict === 'rejected' ? 'st-crosscheck' : 'st-running'}">${{ accepted: '采纳', rejected: '驳回', modified: '修改' }[dd.verdict]}</span>
+    ${esc(dd.note || '')} <span class="muted">${esc(dd.created_at)}</span></div>`).join('');
+
+  $('#page').innerHTML = `
+    <a href="#/project/${t.project_id}" class="muted small">← ${esc(d.project?.title || '项目')}</a>
+    <div class="spread" style="margin:6px 0 2px;align-items:flex-start">
+      <h2 class="page-title" style="max-width:640px">${esc(t.question)}</h2>
+      <div class="row">${statusPill(t.status)}
+        ${t.status !== 'archived' ? `<button class="btn ghost sm" id="btn-archive">归档</button>` : ''}
+        <button class="btn ghost sm" id="btn-del-task">删除</button></div>
+    </div>
+    <div class="page-sub">${memberDot(t.owner_member)} 主责：${esc(owner.name)}（${esc(owner.tagline)}） · 创建于 ${esc(t.created_at)}
+      ${t.collab && JSON.parse(t.collab).length ? ' · 协作：' + JSON.parse(t.collab).map((c) => esc(state.members[c]?.name || c)).join('、') : ''}</div>
+
+    <div class="card" style="margin-bottom:16px">
+      <div class="spread" style="margin-bottom:10px">
+        <div class="sec-title" style="margin:0">${esc(owner.name)} · 工作流程（组员内部调 subagent）</div>
+        <div class="row">
+          <button class="btn ghost sm" id="btn-runall" ${activeConfig() ? '' : 'disabled'}>⚡ 连跑剩余阶段</button>
+        </div>
+      </div>
+      ${stagesHTML}
+      ${t.status !== 'archived' ? `<div class="row" style="margin-top:12px;justify-content:flex-end;gap:8px;flex-wrap:wrap">
+        <button class="btn" id="btn-auto-qa">🛡 送质检互查（QA 三连）</button>
+        <button class="btn ghost" id="btn-manual-review">送审其他组员</button>
+      </div>` : ''}
+    </div>
+
+    <div class="sec-title">互查与问题清单（AI 之间互相检查）</div>
+    ${reviewsHTML || '<div class="card"><div class="empty">还没有互查记录 —— 主流程完成后送质检互查，或手动送审某位组员</div></div>'}
+
+    ${decisions ? `<div class="card" style="margin-top:14px"><div class="sec-title">我的判断记录</div>${decisions}</div>` : ''}
+  `;
+  wireNav();
+  wireTaskActions(d);
+}
+
+function wireTaskActions(d) {
+  const tid = d.task.id;
+  const refresh = () => render();
+
+  $$('[data-run]').forEach((b) => b.onclick = async () => {
+    b.disabled = true; b.textContent = '⏳ 运行中…';
+    const r = await api(`/api/tasks/${tid}/stages/${b.dataset.run}/run`, { method: 'POST', body: {} }).catch((e) => ({ error: e.message }));
+    if (r.error) { toast(r.error, true); b.disabled = false; b.textContent = '▶ 运行'; return; }
+    toast('阶段完成'); refresh();
+  });
+  $$('[data-rerun]').forEach((b) => b.onclick = async () => {
+    await api(`/api/tasks/${tid}/stages/${b.dataset.rerun}/reset`, { method: 'POST', body: {} }); refresh();
+  });
+  $$('[data-toggle-out]').forEach((b) => b.onclick = () => {
+    const el = $('#stage-out-' + b.dataset.toggleOut);
+    const show = el.style.display === 'none';
+    el.style.display = show ? 'block' : 'none';
+    b.textContent = show ? '收起产出' : '查看产出';
+  });
+  const btnRunAll = $('#btn-runall');
+  if (btnRunAll) btnRunAll.onclick = async () => {
+    btnRunAll.disabled = true;
+    const pending = d.stages.filter((s) => s.status === 'pending').map((s) => s.idx);
+    for (let i = 0; i < pending.length; i++) {
+      btnRunAll.textContent = `⏳ ${i + 1}/${pending.length}…`;
+      const r = await api(`/api/tasks/${tid}/stages/${pending[i]}/run`, { method: 'POST', body: {} }).catch((e) => ({ error: e.message }));
+      if (r.error) { toast(r.error, true); break; }
+    }
+    toast('连跑结束'); refresh();
+  };
+  const btnQA = $('#btn-auto-qa');
+  if (btnQA) btnQA.onclick = () => {
+    btnQA.disabled = true; btnQA.textContent = '🛡 质检中…';
+    api(`/api/tasks/${tid}/review`, { method: 'POST', body: { reviewer: 'qa', note: '主流程完成，自动送质检互查' } })
+      .then(() => { toast('质检完成，问题清单已生成'); refresh(); })
+      .catch((e) => { toast(e.message, true); btnQA.disabled = false; btnQA.textContent = '🛡 送质检互查（QA 三连）'; });
+  };
+  const btnMR = $('#btn-manual-review');
+  if (btnMR) btnMR.onclick = () => {
+    const opts = Object.values(state.members).map((m) => `<option value="${m.id}">${m.no} ${esc(m.name)} — ${esc(m.tagline)}</option>`).join('');
+    modal('送审其他组员', `
+      <div class="field"><label>选择审读组员</label><select id="r-member">${opts}</select></div>
+      <div class="field"><label>送审说明（可选）</label><textarea id="r-note" placeholder="告诉审读组员重点关注什么"></textarea></div>`,
+      async () => {
+        const r = await api(`/api/tasks/${tid}/review`, { method: 'POST', body: { reviewer: $('#r-member').value, note: $('#r-note').value } });
+        closeModal(); toast('审读完成，问题清单已生成'); void r; refresh();
+      }, '开始审读');
+  };
+  $$('[data-verdict]').forEach((b) => b.onclick = () => {
+    const [rid, idx, verdict] = b.dataset.verdict.split('|');
+    const needNote = verdict !== 'accepted';
+    modal(needNote ? '填写批注' : '确认采纳', `
+      <div class="field"><label>${needNote ? (verdict === 'rejected' ? '驳回原因 / 修改要求' : '修改说明') : '批注（可选）'}</label>
+      <textarea id="v-note"></textarea></div>`,
+      async () => {
+        await api(`/api/reviews/${rid}/verdict`, { method: 'POST', body: { idx: +idx, verdict, note: $('#v-note').value } });
+        closeModal(); toast('已记录判断'); refresh();
+      }, needNote ? '提交' : '采纳');
+  });
+  const btnArchive = $('#btn-archive');
+  if (btnArchive) btnArchive.onclick = () => {
+    modal('归档任务（最后我自己判断和修改）', `
+      <p class="small muted" style="margin-bottom:10px">归档后任务关闭。可勾选把产出沉淀进知识库，供以后的任务复用。</p>
+      <label style="display:block;margin:6px 0"><input type="checkbox" id="ar-cards" style="width:auto"> 沉淀阅读卡片 → 知识库</label>
+      <label style="display:block;margin:6px 0"><input type="checkbox" id="ar-refs" style="width:auto"> 沉淀参考文献 → 知识库</label>`,
+      async () => {
+        const r = await api(`/api/tasks/${tid}/archive`, { method: 'POST', body: { save_cards: $('#ar-cards').checked, save_refs: $('#ar-refs').checked } });
+        closeModal(); toast(`已归档${r.saved_cards ? `，沉淀 ${r.saved_cards} 张卡片` : ''}${r.saved_refs ? `、${r.saved_refs} 条文献` : ''}`); refresh();
+      }, '归档');
+  };
+  const btnDel = $('#btn-del-task');
+  if (btnDel) btnDel.onclick = async () => {
+    if (!confirm('确定删除该任务？')) return;
+    await api('/api/tasks/' + tid, { method: 'DELETE' }); toast('已删除'); location.hash = '#/projects';
+  };
+}
+
+/* ---------- 组员工作台 ---------- */
+async function memberView(key) {
+  const m = state.members[key];
+  if (!m) { $('#page').innerHTML = '<div class="empty">未找到组员</div>'; return; }
+  const allTasks = await api('/api/tasks');
+  const mine = allTasks.tasks.filter((t) => t.owner_member === key);
+  const color = MEMBER_COLORS[key];
+  $('#page').innerHTML = `
+    <div class="mem-head" style="--mc:${color};background:${color}">
+      <div class="no">${m.no} · ${esc(m.en)}</div>
+      <h2>${esc(m.name)}</h2>
+      <div class="tg">${esc(m.tagline)}</div>
+    </div>
+    <div class="mem-cols">
+      <div class="card"><div class="sec-title">🎯 主要工作</div>${m.duties.map((x) => `<div style="padding:3px 0">• ${esc(x)}</div>`).join('')}</div>
+      <div class="card"><div class="sec-title">🤖 包含的 subagents</div>
+        ${m.subs.map((s) => `<div style="padding:6px 0;border-bottom:1px dashed var(--line)"><b>${esc(s.name)}</b><div class="small muted">${esc(s.duty)}</div></div>`).join('')}</div>
+    </div>
+    <div class="mem-cols">
+      <div class="card"><div class="sec-title">🔧 常用工具</div>${m.tools.map((x) => `<span class="tag">${esc(x)}</span>`).join('')}</div>
+      <div class="card">
+        <div class="sec-title">📥 输入 / 📤 输出</div>
+        <div class="grid" style="grid-template-columns:1fr 1fr">
+          <div>${m.input.map((x) => `<div class="small" style="padding:2px 0">• ${esc(x)}</div>`).join('')}</div>
+          <div>${m.output.map((x) => `<div class="small" style="padding:2px 0">• ${esc(x)}</div>`).join('')}</div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:14px"><div class="sec-title">🧭 工作流程</div>
+      <div class="flow-row">${m.stages.map((s, i) => `<span class="flow-step">${esc(s.name)}</span>${i < m.stages.length - 1 ? '<span class="flow-arrow">→</span>' : ''}`).join('')}</div></div>
+    <div class="card">
+      <div class="sec-title">📋 该组员的任务（${mine.length}）</div>
+      ${mine.map((t) => `<div class="task-row" onclick="location.hash='#/task/${t.id}'">
+        <span class="q">${esc(t.question)}</span>
+        <span class="muted small">${esc(t.project_title || '')}</span>
+        <div class="progress"><i style="width:${(t.stages_done / 5) * 100}%"></i></div>
+        <span class="muted small">${t.stages_done}/5</span>${statusPill(t.status)}</div>`).join('') || '<div class="empty">暂无任务</div>'}
+    </div>`;
+}
+
+/* ---------- 知识库 ---------- */
+async function knowledgeView(tab) {
+  const tabs = { lit: '参考文献', cards: '阅读卡片', terms: '术语表', checklists: '检查清单' };
+  const cur = tabs[tab] ? tab : 'lit';
+  const d = await api('/api/knowledge/' + cur);
+  let body = '';
+  const delBtn = (id) => `<button class="btn ghost sm" data-kdel="${id}">删除</button>`;
+  if (cur === 'lit') {
+    body = `<table class="tbl"><tr><th>题名</th><th>作者</th><th>年份</th><th>期刊/会议</th><th>DOI</th><th>备注</th><th></th></tr>
+      ${d.items.map((x) => `<tr><td>${esc(x.title)}</td><td>${esc(x.authors)}</td><td>${esc(x.year)}</td><td>${esc(x.venue)}</td><td class="small">${esc(x.doi)}</td><td class="small">${esc(x.note)}</td><td>${delBtn(x.id)}</td></tr>`).join('')}</table>`;
+  } else if (cur === 'cards') {
+    body = `<div class="cards-grid">${d.items.map((x) => `<div class="kcard"><div class="t">📄 ${esc(x.lit_title)}</div>
+      <div class="kv"><b>问题</b> ${nl2br(x.question)}</div><div class="kv"><b>方法</b> ${nl2br(x.method)}</div>
+      <div class="kv"><b>结果</b> ${nl2br(x.result)}</div><div class="kv"><b>局限</b> ${nl2br(x.limitation)}</div>
+      <div style="text-align:right">${delBtn(x.id)}</div></div>`).join('') || ''}</div>`;
+  } else if (cur === 'terms') {
+    body = `<table class="tbl"><tr><th>术语</th><th>定义</th><th>单位</th><th></th></tr>
+      ${d.items.map((x) => `<tr><td><b>${esc(x.term)}</b></td><td>${esc(x.definition)}</td><td>${esc(x.unit)}</td><td>${delBtn(x.id)}</td></tr>`).join('')}</table>`;
+  } else {
+    body = d.items.map((x) => `<div class="kcard" style="margin-bottom:8px"><div class="spread"><div class="t">☑ ${esc(x.name)}</div>${delBtn(x.id)}</div>
+      <div>${(JSON.parse(x.items || '[]')).map((it) => `<div class="small">• ${esc(it)}</div>`).join('')}</div></div>`).join('');
+  }
+  $('#page').innerHTML = `
+    <h2 class="page-title">知识库</h2>
+    <div class="page-sub">跨项目复用的研究资产 —— 新任务执行时会自动带上术语表等上下文</div>
+    <div class="tabs">${Object.entries(tabs).map(([k, v]) => `<button data-tab="${k}" class="${k === cur ? 'on' : ''}">${v}</button>`).join('')}
+      <span style="flex:1"></span><button class="btn sm" id="btn-kadd" style="margin:4px 0">＋ 添加</button></div>
+    <div class="card">${body || '<div class="empty">暂无内容</div>'}</div>`;
+  $$('.tabs [data-tab]').forEach((b) => b.onclick = () => { location.hash = '#/knowledge/' + b.dataset.tab; });
+  $$('[data-kdel]').forEach((b) => b.onclick = async () => { if (!confirm('确定删除？')) return; await api(`/api/knowledge/${cur}/${b.dataset.kdel}`, { method: 'DELETE' }); render(); });
+  $('#btn-kadd').onclick = () => {
+    let fields = '';
+    if (cur === 'lit') fields = `<div class="field"><label>题名 *</label><input id="k-title"></div><div class="field"><label>作者</label><input id="k-authors"></div>
+      <div class="field"><label>年份</label><input id="k-year"></div><div class="field"><label>期刊/会议</label><input id="k-venue"></div>
+      <div class="field"><label>DOI</label><input id="k-doi"></div><div class="field"><label>备注</label><input id="k-note"></div>`;
+    else if (cur === 'cards') fields = `<div class="field"><label>文献标题</label><input id="k-lit"></div><div class="field"><label>研究问题</label><textarea id="k-q"></textarea></div>
+      <div class="field"><label>研究方法</label><textarea id="k-m"></textarea></div><div class="field"><label>主要结果</label><textarea id="k-r"></textarea></div>
+      <div class="field"><label>局限</label><textarea id="k-l"></textarea></div>`;
+    else if (cur === 'terms') fields = `<div class="field"><label>术语 *</label><input id="k-term"></div><div class="field"><label>定义</label><input id="k-def"></div><div class="field"><label>单位</label><input id="k-unit"></div>`;
+    else fields = `<div class="field"><label>清单名称 *</label><input id="k-name"></div><div class="field"><label>条目（每行一条）</label><textarea id="k-items"></textarea></div>`;
+    modal('添加到' + tabs[cur], fields, async () => {
+      const body2 = cur === 'lit' ? { title: $('#k-title').value, authors: $('#k-authors').value, year: $('#k-year').value, venue: $('#k-venue').value, doi: $('#k-doi').value, note: $('#k-note').value }
+        : cur === 'cards' ? { lit_title: $('#k-lit').value, question: $('#k-q').value, method: $('#k-m').value, result: $('#k-r').value, limitation: $('#k-l').value }
+        : cur === 'terms' ? { term: $('#k-term').value, definition: $('#k-def').value, unit: $('#k-unit').value }
+        : { name: $('#k-name').value, items: $('#k-items').value.split('\n').map((s) => s.trim()).filter(Boolean) };
+      await api('/api/knowledge/' + cur, { method: 'POST', body: body2 });
+      closeModal(); toast('已添加'); render();
+    }, '添加');
+  };
+}
+
+/* ---------- 青简文献库（内嵌 reading-d01.pages.dev） ---------- */
+const QINGJIAN_URL = 'https://reading-d01.pages.dev/';
+async function readingView() {
+  await loadSettings();
+  $('#page').innerHTML = `
+    <div class="spread" style="margin-bottom:12px;align-items:flex-start">
+      <div><h2 class="page-title">📖 青简 · 文献阅读工作台</h2>
+      <div class="page-sub">PDF / Word 精读、标注与图谱由青简负责；文献卡片、术语表沉淀回本工作台知识库，两者互补。数据保存在青简自己的浏览器库中。</div></div>
+      <a class="btn ghost" href="${QINGJIAN_URL}" target="_blank" rel="noopener noreferrer">↗ 新窗口打开青简</a>
+    </div>
+    <div style="height:calc(100vh - 150px);min-height:520px">
+      <iframe src="${QINGJIAN_URL}" title="青简文献阅读工作台" style="width:100%;height:100%;border:1px solid var(--line);border-radius:var(--radius);background:#fff" allow="clipboard-read; clipboard-write; fullscreen"></iframe>
+    </div>`;
+}
+
+/* ---------- 设置 ---------- */
+const PRESETS = [
+  ['DeepSeek', 'https://api.deepseek.com/v1', 'deepseek-chat'],
+  ['Kimi (Moonshot)', 'https://api.moonshot.cn/v1', 'moonshot-v1-32k'],
+  ['OpenAI', 'https://api.openai.com/v1', 'gpt-4o'],
+  ['Qwen (通义)', 'https://dashscope.aliyuncs.com/compatible-mode/v1', 'qwen-max'],
+  ['GLM (智谱)', 'https://open.bigmodel.cn/api/paas/v4', 'glm-4-plus'],
+  ['自定义 OpenAI 兼容端点', '', ''],
+];
+
+async function settingsView() {
+  await loadSettings();
+  const s = state.settings;
+  const rows = (s.configs || []).map((c, i) => `
+    <tr>
+      <td><input type="radio" name="act" ${c.id === s.active_id ? 'checked' : ''} data-act="${c.id}"></td>
+      <td><b>${esc(c.name)}</b></td>
+      <td class="small">${esc(c.base_url)}</td>
+      <td class="small">${esc(c.model)}</td>
+      <td class="small muted">${esc(c.api_key_masked) || '未填写'}</td>
+      <td style="white-space:nowrap">
+        <button class="btn ghost sm" data-test="${i}">测试</button>
+        <button class="btn ghost sm" data-edit="${i}">编辑</button>
+        <button class="btn ghost sm" data-del="${i}">删除</button>
+      </td>
+    </tr>`).join('');
+  $('#page').innerHTML = `
+    <h2 class="page-title">设置</h2>
+    <div class="page-sub">像雅思学习平台一样：在设置里随时选择、更换 AI 模型，组员执行任务时使用当前选中的模型</div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="spread" style="margin-bottom:8px"><div class="sec-title" style="margin:0">🤖 模型配置（勾选 = 当前使用）</div>
+      <button class="btn sm" id="btn-add-model">＋ 添加配置</button></div>
+      <table class="tbl"><tr><th></th><th>名称</th><th>API 地址</th><th>模型</th><th>Key</th><th>操作</th></tr>${rows || ''}</table>
+      ${(s.configs || []).length === 0 ? '<div class="empty">还没有模型配置，点右上角添加</div>' : ''}
+      <div class="small muted" style="margin-top:8px">支持任意 OpenAI 兼容端点（/chat/completions）。Key 仅保存在服务端数据库，前端只显示掩码。</div>
+    </div>
+    <div class="card" style="max-width:460px">
+      <div class="sec-title">🔑 修改密码</div>
+      <div class="field"><label>旧密码</label><input id="pw-old" type="password"></div>
+      <div class="field"><label>新密码（至少 6 位）</label><input id="pw-new" type="password"></div>
+      <button class="btn" id="btn-pw">保存新密码</button>
+    </div>`;
+
+  $$('[data-act]').forEach((r) => r.onchange = async () => {
+    await api('/api/settings', { method: 'PUT', body: { configs: s.configs, active_id: r.dataset.act } });
+    toast('已切换当前模型'); await loadSettings(); render();
+  });
+  $$('[data-del]').forEach((b) => b.onclick = async () => {
+    if (!confirm('删除该配置？')) return;
+    const configs = s.configs.filter((_, i) => i !== +b.dataset.del);
+    await api('/api/settings', { method: 'PUT', body: { configs, active_id: configs[0]?.id || '' } });
+    toast('已删除'); await loadSettings(); render();
+  });
+  $$('[data-test]').forEach((b) => b.onclick = async () => {
+    b.disabled = true; b.textContent = '测试中…';
+    const c = s.configs[+b.dataset.test];
+    const r = await api('/api/settings/test', { method: 'POST', body: { id: c.id, base_url: c.base_url, api_key: '', model: c.model } }).catch((e) => ({ error: e.message }));
+    b.disabled = false; b.textContent = '测试';
+    r.ok ? toast(`✅ 连通成功：${esc(r.reply)}`) : toast(r.error, true);
+  });
+  $$('[data-edit]').forEach((b) => b.onclick = () => modelModal(s.configs[+b.dataset.edit]));
+  $('#btn-add-model').onclick = () => modelModal(null);
+  $('#btn-pw').onclick = async () => {
+    try {
+      await api('/api/password', { method: 'PUT', body: { old_password: $('#pw-old').value, new_password: $('#pw-new').value } });
+      toast('密码已修改'); $('#pw-old').value = ''; $('#pw-new').value = '';
+    } catch (e) { toast(e.message, true); }
+  };
+}
+
+function modelModal(cfg) {
+  const isNew = !cfg;
+  const presetOpts = PRESETS.map((p) => `<option value="${p[1]}|${p[2]}">${p[0]}</option>`).join('');
+  modal(isNew ? '添加模型配置' : '编辑模型配置', `
+    <div class="field"><label>快速填入预设</label><select id="m-preset"><option value="">— 选择预设 —</option>${presetOpts}</select></div>
+    <div class="field"><label>配置名称 *</label><input id="m-name" value="${esc(cfg?.name || '')}" placeholder="如：DeepSeek V3"></div>
+    <div class="field"><label>API 地址（OpenAI 兼容，含 /v1）*</label><input id="m-url" value="${esc(cfg?.base_url || '')}" placeholder="https://api.deepseek.com/v1"></div>
+    <div class="field"><label>模型名 *</label><input id="m-model" value="${esc(cfg?.model || '')}" placeholder="如：deepseek-chat"></div>
+    <div class="field"><label>API Key ${isNew ? '*' : `（已存 ${esc(cfg?.api_key_masked || '')}，留空 = 不修改）`}</label><input id="m-key" type="password" placeholder="${isNew ? 'sk-...' : '留空保持不变'}"></div>
+    <div class="row" style="justify-content:flex-end"><button class="btn ghost sm" id="m-test">发送测试请求</button></div>`,
+    async () => {
+      const list = state.settings.configs || [];
+      const item = {
+        id: cfg?.id || '', name: $('#m-name').value, base_url: $('#m-url').value, model: $('#m-model').value,
+        api_key: $('#m-key').value,
+      };
+      let configs;
+      if (isNew) configs = [...list, item];
+      else configs = list.map((c) => (c.id === cfg.id ? { ...item, id: cfg.id } : c));
+      await api('/api/settings', { method: 'PUT', body: { configs, active_id: state.settings.active_id || (isNew ? item.id : '') } });
+      closeModal(); toast('已保存'); await loadSettings(); render();
+    }, '保存');
+  $('#m-preset').onchange = () => {
+    const v = $('#m-preset').value; if (!v) return;
+    const [u, m] = v.split('|'); $('#m-url').value = u; $('#m-model').value = m;
+    if (!$('#m-name').value) $('#m-name').value = $('#m-preset').selectedOptions[0].text;
+  };
+  $('#m-test').onclick = async () => {
+    const btn = $('#m-test'); btn.disabled = true; btn.textContent = '测试中…';
+    const r = await api('/api/settings/test', { method: 'POST', body: { id: cfg?.id, base_url: $('#m-url').value, api_key: $('#m-key').value, model: $('#m-model').value } }).catch((e) => ({ error: e.message }));
+    btn.disabled = false; btn.textContent = '发送测试请求';
+    r.ok ? toast('✅ 连通成功：' + r.reply) : toast(r.error, true);
+  };
+}
+</script>
+</body>
+</html>

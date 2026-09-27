@@ -1,0 +1,12 @@
+﻿name = "workbench"
+main = "src/worker.js"
+compatibility_date = "2024-09-23"
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "workbench-db"
+database_id = "YOUR_DATABASE_ID" # Prompt ② 会自动填入
